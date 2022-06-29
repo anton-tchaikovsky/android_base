@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">android_start</string>
+    <string name="button_test1">button_test1</string>
+    <string name="switch_test">switch_test</string>
+    <string name="text_test">Text_test</string>
+    <string name="button_test2">button_test2</string>
+    <string name="name">Введите имя</string>
+    <string name="enabled">Включить</string>
 </resources>
