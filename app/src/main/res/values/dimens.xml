@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="button_text">35sp</dimen>
+    <dimen name="button_text">20sp</dimen>
+    <dimen name="text_display">35sp</dimen>
+    <dimen name="text_display_land">20sp</dimen>
+    <dimen name="button_text_land">15sp</dimen>
 </resources>
