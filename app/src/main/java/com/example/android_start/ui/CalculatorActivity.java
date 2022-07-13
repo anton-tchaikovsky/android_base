@@ -1,44 +1,49 @@
 package com.example.android_start.ui;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.RequiresApi;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import com.google.android.material.radiobutton.MaterialRadioButton;
 import com.example.android_start.R;
 import com.example.android_start.calculator.CalculatorImpl;
 import com.example.android_start.calculator.Operation;
 
-import java.io.Serializable;
 import java.util.HashMap;
 
-public class CalculatorActivity extends AppCompatActivity implements CalculatorDisplay, Serializable {
+public class CalculatorActivity extends BaseActivity implements CalculatorDisplay {
 
     private TextView resultTxt;
     private CalculatorPresenter calculatorPresenter;
-    private final static String KEY_CALCULATOR = "key1";
-    private final static String KEY_DISPLAY = "key2";
+    private final static String KEY_DISPLAY = "key1";
+    private final static String KEY_CALCULATOR = "key2";
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(KEY_CALCULATOR, calculatorPresenter);
-        outState.putString(KEY_DISPLAY, (String) resultTxt.getText());
+        outState.putParcelable(KEY_CALCULATOR, calculatorPresenter); // сохраняем текущие значения полей calculatorPresenter
+        outState.putString(KEY_DISPLAY, (String) resultTxt.getText()); // сохраняем текущее значение с дисплея
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        calculatorPresenter = (CalculatorPresenter) savedInstanceState.getSerializable(KEY_CALCULATOR);
-        display(savedInstanceState.getString(KEY_DISPLAY));
+        calculatorPresenter = savedInstanceState.getParcelable(KEY_CALCULATOR); // восстанавливаем сохраненные значения полей calculatorPresenter
+        display(savedInstanceState.getString(KEY_DISPLAY));// восстанавливаем сохраненное значение дисплея и выводим его на дисплей
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        initThemeChooser();
+
         resultTxt = findViewById(R.id.display);
         calculatorPresenter = new CalculatorPresenter(new CalculatorImpl(), this);
 
@@ -131,13 +136,31 @@ public class CalculatorActivity extends AppCompatActivity implements CalculatorD
 
     }
 
-    /**
-     * Метод выводит на дисплей соответствующию строковую информацию.
-     *
-     * @param result
-     */
     @Override
     public void display(String result) {
         resultTxt.setText(result);
+    }
+
+
+    private void initThemeChooser() {
+        initRadioButton(findViewById(R.id.radioButtonBase),
+                CodeStyleBase);
+        initRadioButton(findViewById(R.id.radioButtonStyle1),
+                CodeStyle1);
+        initRadioButton(findViewById(R.id.radioButtonStyle2),
+                CodeStyle2);
+
+        RadioGroup rg = findViewById(R.id.radioButtons);
+        ((MaterialRadioButton) rg.getChildAt(getCodeStyle(CodeStyleBase))).setChecked(true);
+    }
+
+    private void initRadioButton(View button, final int codeStyle) {
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setAppTheme(codeStyle);
+                recreate();
+            }
+        });
     }
 }
