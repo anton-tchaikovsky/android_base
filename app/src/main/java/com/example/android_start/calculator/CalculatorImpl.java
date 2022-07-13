@@ -1,8 +1,7 @@
 package com.example.android_start.calculator;
 
-import java.io.Serializable;
 
-public class CalculatorImpl implements Calculator, Serializable {
+public class CalculatorImpl implements Calculator {
     @Override
     public double operation(double firstArg, double secondArg, Operation operation) {
         switch (operation){

@@ -2,6 +2,8 @@
 <resources>
     <dimen name="button_text">20sp</dimen>
     <dimen name="text_display">35sp</dimen>
-    <dimen name="text_display_land">20sp</dimen>
-    <dimen name="button_text_land">15sp</dimen>
+    <dimen name="text_radio_button">15sp</dimen>
+    <dimen name="padding_text_view">10dp</dimen>
+    <dimen name="margin_button">5dp</dimen>
+    <dimen name="min_height_text_view">60dp</dimen>
 </resources>

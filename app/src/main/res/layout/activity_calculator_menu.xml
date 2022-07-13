@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.CalculatorMenuActivity">
+
+    <RadioGroup
+        android:id="@+id/radioButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/grey"
+        >
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/radioButtonBase"
+            android:layout_weight="1"
+            android:text="@string/style_base"
+            style="@style/StyleRadioButton"
+            android:fontFamily="@font/font_base"
+            />
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/radioButtonStyle1"
+            android:layout_weight="1"
+            android:text="@string/style1"
+            style="@style/StyleRadioButton"
+            android:fontFamily="@font/font1"/>
+
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/radioButtonStyle2"
+            android:layout_weight="1"
+            android:text="@string/style2"
+            style="@style/StyleRadioButton"
+            android:fontFamily="@font/font2"/>
+
+    </RadioGroup>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/back"
+        style="@style/StyleDisplay"
+        android:textSize="@dimen/button_text"
+        android:gravity="center"
+        android:text="@string/back"
+        />
+
+</LinearLayout>

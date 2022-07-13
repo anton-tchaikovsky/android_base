@@ -1,46 +1,64 @@
 package com.example.android_start.ui;
 
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import com.example.android_start.calculator.Theme;
+import com.example.android_start.calculator.ThemeRepository;
+import com.example.android_start.calculator.ThemeRepositoryImpl;
 import com.example.android_start.R;
 import com.example.android_start.calculator.CalculatorImpl;
 import com.example.android_start.calculator.Operation;
 
-import java.io.Serializable;
 import java.util.HashMap;
 
-public class CalculatorActivity extends AppCompatActivity implements CalculatorDisplay, Serializable {
+
+public class CalculatorActivity extends AppCompatActivity implements CalculatorDisplay {
 
     private TextView resultTxt;
     private CalculatorPresenter calculatorPresenter;
-    private final static String KEY_CALCULATOR = "key1";
-    private final static String KEY_DISPLAY = "key2";
+    private ThemeRepository themeRepository;
+    private final static String KEY_DISPLAY = "key1";
+    private final static String KEY_CALCULATOR = "key2";
+
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(KEY_CALCULATOR, calculatorPresenter);
-        outState.putString(KEY_DISPLAY, (String) resultTxt.getText());
+        outState.putParcelable(KEY_CALCULATOR, calculatorPresenter); // сохраняем текущие значения полей calculatorPresenter
+        outState.putString(KEY_DISPLAY, (String) resultTxt.getText()); // сохраняем текущее значение с дисплея
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        calculatorPresenter = (CalculatorPresenter) savedInstanceState.getSerializable(KEY_CALCULATOR);
-        display(savedInstanceState.getString(KEY_DISPLAY));
+        calculatorPresenter = savedInstanceState.getParcelable(KEY_CALCULATOR); // восстанавливаем сохраненные значения полей calculatorPresenter
+        display(savedInstanceState.getString(KEY_DISPLAY));// восстанавливаем сохраненное значение дисплея и выводим его на дисплей
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        themeRepository = ThemeRepositoryImpl.getInstance(this);
+        setTheme(themeRepository.getSaveTheme().getThemeRes());// выставляем тему приложения
         setContentView(R.layout.activity_main);
+
         resultTxt = findViewById(R.id.display);
         calculatorPresenter = new CalculatorPresenter(new CalculatorImpl(), this);
+
+        // Создание OnClickListener для каждой кнопки: группового для цифровых кнопок и кнопок операторов
+        // и анонимных для других кнопок.
 
         HashMap<Integer, Integer> digits = new HashMap<>();
         digits.put(R.id.button_1, 1);
@@ -54,9 +72,6 @@ public class CalculatorActivity extends AppCompatActivity implements CalculatorD
         digits.put(R.id.button_9, 9);
         digits.put(R.id.button_0, 0);
 
-
-        // Создание OnClickListener для каждой кнопки: группового для цифровых кнопок и кнопок операторов
-        // и анонимных для других кнопок.
 
         View.OnClickListener digitClickListener = new View.OnClickListener() {
             @Override
@@ -129,15 +144,43 @@ public class CalculatorActivity extends AppCompatActivity implements CalculatorD
             }
         });
 
+
+        // Создаем Launcher для запуска CalculatorMenuActivity
+        ActivityResultLauncher<Intent> themeLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == Activity.RESULT_OK) {
+                Intent intent = result.getData();
+                assert intent != null;
+                Theme selectedTheme = (Theme) intent.getSerializableExtra(CalculatorMenuActivity.EXTRA_THEME);
+                themeRepository.saveTheme(selectedTheme);
+                recreate();
+            }
+        });
+
+        // Запуск активи CalculatorMenuActivity c получением результата в виде выбранной темы
+        findViewById(R.id.button_setting).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(CalculatorActivity.this, CalculatorMenuActivity.class);
+                intent.putExtra(CalculatorMenuActivity.EXTRA_THEME, themeRepository.getSaveTheme());
+                themeLauncher.launch(intent);
+            }
+        });
+
+        // Переход на сайт https://gb.ru
+        findViewById(R.id.button_browser).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://gb.ru"));
+                startActivity(Intent.createChooser(browserIntent, null));
+            }
+        });
+
     }
 
-    /**
-     * Метод выводит на дисплей соответствующию строковую информацию.
-     *
-     * @param result
-     */
     @Override
     public void display(String result) {
         resultTxt.setText(result);
     }
+
+
 }

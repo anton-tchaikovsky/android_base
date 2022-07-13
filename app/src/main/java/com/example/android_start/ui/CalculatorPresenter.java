@@ -1,19 +1,20 @@
 package com.example.android_start.ui;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.example.android_start.calculator.Calculator;
 import com.example.android_start.calculator.Operation;
-
-import java.io.Serializable;
 import java.text.DecimalFormat;
 
 
-public class CalculatorPresenter implements Serializable {
-    final private Calculator calculator; // объект калькулятора
-    final private CalculatorDisplay calculatorDisplay; // объект дисплея
+public class CalculatorPresenter implements Parcelable {
+    private final Calculator calculator; // объект калькулятора
+    private final CalculatorDisplay calculatorDisplay; // объект дисплея
     private Operation operator; // объект операторов
     private double firstArg; //первый аргумент (вводится пользователем при запуске приложения или после нажатия AC)
     private double secondArg; // второй аргумент (вводится пользователем после нажатия оператора или равно)
-    private boolean isSecond; // флаг, показывающий, какой аргумент вводит польователь: первый (false), второй (true)
+    private boolean isSecond; // флаг, показывающий, какой аргумент вводит пользователь: первый (false), второй (true)
     private boolean isEquals; // флаг, показывающий, нажата ли кнопка равно: true - нажата, false - не нажата.
     private Double numberAfterPoint; // счетчик количества десятичных разрядов дробной части аргумента (после разделителя (точки)).
     private final DecimalFormat formatter = new DecimalFormat();// объект форматера для корректного вывода информации на дисплей.
@@ -26,6 +27,51 @@ public class CalculatorPresenter implements Serializable {
         isSecond = false;
         isEquals = false;
     }
+
+    protected CalculatorPresenter(Calculator calculator, CalculatorDisplay calculatorDisplay, Parcel in) {
+        this.calculator = calculator;
+        this.calculatorDisplay = calculatorDisplay;
+        firstArg = in.readDouble();
+        secondArg = in.readDouble();
+        isSecond = in.readByte() != 0;
+        isEquals = in.readByte() != 0;
+        if (in.readByte() == 0) {
+            numberAfterPoint = null;
+        } else {
+            numberAfterPoint = in.readDouble();
+        }
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeDouble(firstArg);
+        dest.writeDouble(secondArg);
+        dest.writeByte((byte) (isSecond ? 1 : 0));
+        dest.writeByte((byte) (isEquals ? 1 : 0));
+        if (numberAfterPoint == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeDouble(numberAfterPoint);
+        }
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public final Creator<CalculatorPresenter> CREATOR = new Creator<CalculatorPresenter>() {
+        @Override
+        public CalculatorPresenter createFromParcel(Parcel in) {
+            return new CalculatorPresenter(calculator, calculatorDisplay, in);
+        }
+
+        @Override
+        public CalculatorPresenter[] newArray(int size) {
+            return new CalculatorPresenter[size];
+        }
+    };
 
     /**
      * Метод при нажатии соответствующей цифровой кнопки выполняет сохранение значения аргумента (первого или второго)

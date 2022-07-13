@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Калькулятор</string>
+    <string name="style_base">Базовый шрифт</string>
+    <string name="style1">Первый шрифт</string>
+    <string name="style2">Второй шрифт</string>
+    <string name="settings">Настройки</string>
+    <string name="back">Применить</string>
+    <string name="browser">Браузер</string>
+</resources>
