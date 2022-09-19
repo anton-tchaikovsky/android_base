@@ -43,6 +43,7 @@ public class CalculatorActivity extends AppCompatActivity implements CalculatorD
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         calculatorPresenter = savedInstanceState.getParcelable(KEY_CALCULATOR); // восстанавливаем сохраненные значения полей calculatorPresenter
+        calculatorPresenter.setCalculatorDisplay(this);// устанавливаем дисплей калькулятора
         display(savedInstanceState.getString(KEY_DISPLAY));// восстанавливаем сохраненное значение дисплея и выводим его на дисплей
     }
 
@@ -55,6 +56,7 @@ public class CalculatorActivity extends AppCompatActivity implements CalculatorD
         setContentView(R.layout.activity_main);
 
         resultTxt = findViewById(R.id.display);
+       if (savedInstanceState==null)
         calculatorPresenter = new CalculatorPresenter(new CalculatorImpl(), this);
 
         // Создание OnClickListener для каждой кнопки: группового для цифровых кнопок и кнопок операторов

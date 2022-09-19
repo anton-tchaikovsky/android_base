@@ -10,12 +10,14 @@ import java.text.DecimalFormat;
 
 public class CalculatorPresenter implements Parcelable {
     private final Calculator calculator; // объект калькулятора
-    private final CalculatorDisplay calculatorDisplay; // объект дисплея
+    private CalculatorDisplay calculatorDisplay; // объект дисплея
     private Operation operator; // объект операторов
     private double firstArg; //первый аргумент (вводится пользователем при запуске приложения или после нажатия AC)
     private double secondArg; // второй аргумент (вводится пользователем после нажатия оператора или равно)
     private boolean isSecond; // флаг, показывающий, какой аргумент вводит пользователь: первый (false), второй (true)
     private boolean isEquals; // флаг, показывающий, нажата ли кнопка равно: true - нажата, false - не нажата.
+    private boolean isSecondPress;// флаг, показывающий, введен ли второй аргумент: true - введен, false - не введен.
+    // isSecondPress необходим для корректной работы при последовательном нажатии нескольких операторов (без ввода второго аргумента).
     private Double numberAfterPoint; // счетчик количества десятичных разрядов дробной части аргумента (после разделителя (точки)).
     private final DecimalFormat formatter = new DecimalFormat();// объект форматера для корректного вывода информации на дисплей.
 
@@ -26,6 +28,7 @@ public class CalculatorPresenter implements Parcelable {
         secondArg = 0.0;
         isSecond = false;
         isEquals = false;
+        isSecondPress = false;
     }
 
     protected CalculatorPresenter(Calculator calculator, CalculatorDisplay calculatorDisplay, Parcel in) {
@@ -35,6 +38,7 @@ public class CalculatorPresenter implements Parcelable {
         secondArg = in.readDouble();
         isSecond = in.readByte() != 0;
         isEquals = in.readByte() != 0;
+        isSecondPress = in.readByte() !=0;
         if (in.readByte() == 0) {
             numberAfterPoint = null;
         } else {
@@ -48,6 +52,7 @@ public class CalculatorPresenter implements Parcelable {
         dest.writeDouble(secondArg);
         dest.writeByte((byte) (isSecond ? 1 : 0));
         dest.writeByte((byte) (isEquals ? 1 : 0));
+        dest.writeByte((byte) (isSecondPress ? 1 : 0));
         if (numberAfterPoint == null) {
             dest.writeByte((byte) 0);
         } else {
@@ -73,6 +78,10 @@ public class CalculatorPresenter implements Parcelable {
         }
     };
 
+    public void setCalculatorDisplay(CalculatorDisplay calculatorDisplay){
+        this.calculatorDisplay = calculatorDisplay;
+    }
+
     /**
      * Метод при нажатии соответствующей цифровой кнопки выполняет сохранение значения аргумента (первого или второго)
      * и выводит его актуальное значение на дисплей.
@@ -85,7 +94,7 @@ public class CalculatorPresenter implements Parcelable {
             int lengthSecondArg = numberAfterPoint==null? formatter.format(secondArg).length() : formatter.format(secondArg).length()-1;
             // Ввод первого аргумента (не более 12 цифр).
             if (!isSecond && lengthFirstArg<12){
-                // Ввод вещественной части первго аргумента.
+                // Ввод вещественной части первого аргумента.
                 if (numberAfterPoint==null){
                     firstArg=firstArg*10 + digit;
                     displayFormatter(firstArg);
@@ -98,6 +107,7 @@ public class CalculatorPresenter implements Parcelable {
                 }
             // Ввод второго аргумента (не более 12 цифр).
             } else if (isSecond && lengthSecondArg<12) {
+                isSecondPress = true;
                 // Ввод вещественной части второго аргумента.
                 if (numberAfterPoint==null){
                     secondArg=secondArg*10 + digit;
@@ -121,8 +131,8 @@ public class CalculatorPresenter implements Parcelable {
      * @param operator - объект (enum) соответствующей математической операции.
      */
     public void onOperatorsPressed (Operation operator){
-        // Если
-        if (this.operator != null){
+
+        if (this.operator != null && isSecondPress){
             firstArg = calculator.operation(firstArg,secondArg,this.operator);
             displayFormatter(firstArg);
         }
@@ -131,6 +141,7 @@ public class CalculatorPresenter implements Parcelable {
         this.operator = operator;
         numberAfterPoint=null;
         isEquals = false;
+        isSecondPress = false;
     }
 
     /**
@@ -159,6 +170,7 @@ public class CalculatorPresenter implements Parcelable {
         this.operator = null;
         numberAfterPoint=null;
         isEquals = false;
+        isSecondPress = false;
         displayFormatter(firstArg);
     }
 
@@ -168,7 +180,7 @@ public class CalculatorPresenter implements Parcelable {
      * - подготавливает приложение для ввода оператора.
      */
     public void onEqualsPressed(){ //
-        if (this.operator != null){
+        if (this.operator != null && isSecondPress){
             firstArg = calculator.operation(firstArg,secondArg,this.operator);
             displayFormatter(firstArg);
         }
@@ -177,6 +189,7 @@ public class CalculatorPresenter implements Parcelable {
         this.operator = null;
         numberAfterPoint=null;
         isEquals = true;
+        isSecondPress = false;
     }
 
     /**
